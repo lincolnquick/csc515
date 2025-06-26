@@ -43,6 +43,19 @@ if not ret:
 gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
 # Detect the face
+faces = face_cascade.detectMultiScale(
+    gray, scaleFactor=1.1, minNeighbors=5,
+    minSize=(100,100))
+if len(faces) == 0:
+    raise RuntimeError("No face detected. Try again.")
+
+# Bounding box for face
+(x, y, w, h) = faces[0]
+
+# Draw a green circle around the face
+center = (x + w//2, y + h//2)
+radius = int(0.9 * max(w, h) / 2) # Keep circle inside the box by scaling it
+cv2.circle(img, center, radius, (0, 255, 0), thickness=2) # Green
 
 # Show the image
 cv2.imshow("Original Capture", img)
