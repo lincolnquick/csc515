@@ -33,7 +33,10 @@ eye_cascade = cv2.CascadeClassifier(str(EYE_CASCADE))
 
 # Capture image from webcam
 cap = cv2.VideoCapture(0) # default camera
-ret, img = cap.read()
+
+# Warm up by discarding first 29 frames
+for _ in range(30):
+    ret, img = cap.read()
 cap.release()
 
 if not ret:
@@ -56,6 +59,23 @@ if len(faces) == 0:
 center = (x + w//2, y + h//2)
 radius = int(0.9 * max(w, h) / 2) # Keep circle inside the box by scaling it
 cv2.circle(img, center, radius, (0, 255, 0), thickness=2) # Green
+
+# Detect the eyes
+roi_gray = gray[y:y+h, x:x+w]
+roi_img = img[y:y+h, x:x+w]
+
+eyes = eye_cascade.detectMultiScale(
+    roi_gray, 
+    scaleFactor=1.05, 
+    minNeighbors=2,
+    minSize=(10,10))
+
+# Draw red rectangles eyes detected
+for (ex, ey, ew, eh) in eyes[:2]:
+    cv2.rectangle(roi_img,
+                  (ex, ey),
+                  (ex+ew, ey+eh),
+                  (0, 0, 255), 2)
 
 # Show the image
 cv2.imshow("Original Capture", img)
